@@ -71,14 +71,16 @@ def on_send_helper(event: me.ClickEvent):  # Helper function to run on_send
 def display_conversation(conversation):
     print("Conversation data:", conversation)  # Print for debugging
     for message in conversation:
-        # Use the correct keys from your conversation data
-        role = message.get("role", "")  
-        content = message.get("message", "")  # Correct key for message content
+        role = message.get("role", "")
+        content = message.get("message", "")
 
         if role == "user":
             me.text(f"You: {content}")
         else:
-            me.text(f"{role}: {content}")
+            if content.startswith("<audio"):
+                me.html(content)  # Render audio tag using me.html
+            else:
+                me.text(f"{role}: {content}")
 
 @me.page(path="/")
 def index():
