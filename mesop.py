@@ -56,7 +56,10 @@ async def on_send(event: me.ClickEvent):  # Keep on_send asynchronous
 
     def update_state_with_response(response):
         print("API Response (in callback):", response)  # Print for debugging
-        state.agent_response = response["choices"][0]["message"]["content"]
+        print(type(response["choices"]))
+        print(type(response["choices"][0]))
+        print(type(response["choices"][0]["message"]))
+        state.agent_response = response["choices"][0]["message"]["content"]  # Adjust indexing if needed
         state.user_input = ""
 
     try:
@@ -74,7 +77,7 @@ def display_conversation(conversation):
         role = message.get("role", "")
         content = message.get("message", "")
 
-        with me.box(style=me.Style(margin="8px", padding="8px", border_radius="4px")):
+        with me.box(style=me.Style(margin=me.Margin.all("8px"), padding=me.Padding.all("8px"), border_radius="4px")):
             if role == "user":
                 me.text(f"You: {content}", style=me.Style(color="blue"))
             else:
@@ -88,9 +91,9 @@ def index():
     state = me.state(State)
 
     with me.box(style=me.Style(padding=me.Padding.all("16px"), display="flex", flex_direction="column", height="100vh", 
-                                font_family="Roboto, sans-serif", background="#f5f5f5")):  # Corrected padding
+                                font_family="Roboto, sans-serif", background="#f5f5f5")):
         # API Connection Section
-        with me.box(style=me.Style(margin=me.Margin(bottom="16px"), padding=me.Padding.all("12px"),  # Corrected padding
+        with me.box(style=me.Style(margin=me.Margin(bottom="16px"), padding=me.Padding.all("12px"), 
                                     border=me.Border.all(me.BorderSide(width=1, color="#ddd")),
                                     border_radius="4px", background="#fff")): 
             me.input(
@@ -111,7 +114,7 @@ def index():
             me.text(state.connection_status, style=me.Style(margin=me.Margin(top="8px")))
 
         # Conversation Area
-        with me.box(style=me.Style(flex="1 1 auto", overflow="auto", padding=me.Padding.all("12px"),  # Corrected padding
+        with me.box(style=me.Style(flex="1 1 auto", overflow="auto", padding=me.Padding.all("12px"), 
                                     border=me.Border.all(me.BorderSide(width=1, color="#ddd")),
                                     border_radius="4px", background="#fff")):
             if state.api_key and state.base_uri:
