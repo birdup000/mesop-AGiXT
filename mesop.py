@@ -10,7 +10,7 @@ class State:
     agent_name: str = "gpt4free"
     api_key: str = ""
     base_uri: str = "http://localhost:7437"  # Default base URI
-    connection_status: str = "Not connected"  # Add connection status to state
+    connection_status: str = "Not connected"
 
 def on_input_change(event: me.InputEvent):
     state = me.state(State)
@@ -69,49 +69,59 @@ def on_send_helper(event: me.ClickEvent):  # Helper function to run on_send
     asyncio.run(on_send(event))
 
 def display_conversation(conversation):
-    print("Conversation data:", conversation)  # Print for debugging
+    print("Conversation data:", conversation)
     for message in conversation:
         role = message.get("role", "")
         content = message.get("message", "")
 
-        if role == "user":
-            me.text(f"You: {content}")
-        else:
-            if content.startswith("<audio"):
-                me.html(content)  # Render audio tag using me.html
+        with me.box(style=me.Style(margin="8px", padding="8px", border_radius="4px")):
+            if role == "user":
+                me.text(f"You: {content}", style=me.Style(color="blue"))
             else:
-                me.text(f"{role}: {content}")
+                if content.startswith("<audio"):
+                    me.html(content)
+                else:
+                    me.text(f"{role}: {content}", style=me.Style(color="green"))
 
 @me.page(path="/")
 def index():
     state = me.state(State)
 
-    with me.box(style=me.Style(padding=me.Padding.all("16px"), display="flex", flex_direction="column", height="100vh")):
+    with me.box(style=me.Style(padding=me.Padding.all("16px"), display="flex", flex_direction="column", height="100vh", 
+                                font_family="Roboto, sans-serif", background="#f5f5f5")):  # Corrected padding
         # API Connection Section
-        with me.box(style=me.Style(margin=me.Margin(bottom="16px"))):
+        with me.box(style=me.Style(margin=me.Margin(bottom="16px"), padding=me.Padding.all("12px"),  # Corrected padding
+                                    border=me.Border.all(me.BorderSide(width=1, color="#ddd")),
+                                    border_radius="4px", background="#fff")): 
             me.input(
-                label="API Key", 
-                value=state.api_key, 
+                label="API Key",
+                value=state.api_key,
                 on_input=on_api_key_change,
-                placeholder="Enter your API key here"
+                placeholder="Enter your API key here",
+                style=me.Style(width="100%")
             )
             me.input(
-                label="Base URI", 
-                value=state.base_uri, 
-                on_input=on_base_uri_change, 
-                placeholder="Enter AGiXT API base URI"
+                label="Base URI",
+                value=state.base_uri,
+                on_input=on_base_uri_change,
+                placeholder="Enter AGiXT API base URI",
+                style=me.Style(width="100%", margin=me.Margin(top="8px")) 
             )
-            me.button("Connect", on_click=on_connect)
-            me.text(state.connection_status)  # Display connection status
+            me.button("Connect", on_click=on_connect, style=me.Style(margin=me.Margin(top="8px"), background="#4CAF50", color="#fff"))
+            me.text(state.connection_status, style=me.Style(margin=me.Margin(top="8px")))
 
-        # Chat Section
-        with me.box(style=me.Style(flex="1 1 auto", overflow="auto")):
-            if state.api_key and state.base_uri:  # Check if credentials are provided
+        # Conversation Area
+        with me.box(style=me.Style(flex="1 1 auto", overflow="auto", padding=me.Padding.all("12px"),  # Corrected padding
+                                    border=me.Border.all(me.BorderSide(width=1, color="#ddd")),
+                                    border_radius="4px", background="#fff")):
+            if state.api_key and state.base_uri:
                 aglxt = AGiXTSDK(base_uri=state.base_uri, api_key=state.api_key)
                 conversation = aglxt.get_conversation(agent_name=state.agent_name, 
                                                     conversation_name=state.conversation_name)
                 display_conversation(conversation)
-        with me.box(style=me.Style(display="flex", gap="8px", margin=me.Margin(top="16px"))):
+
+        # Input Section
+        with me.box(style=me.Style(display="flex", gap="8px", margin=me.Margin(top="16px"))): 
             me.input(
                 placeholder="Type your message...",
                 value=state.user_input,
@@ -119,4 +129,4 @@ def index():
                 style=me.Style(flex="1 1 auto"),
                 on_enter=on_send,
             )
-            me.button("Send", on_click=on_send_helper)  # Use on_send_helper
+            me.button("Send", on_click=on_send_helper, style=me.Style(background="#2196F3", color="#fff")) 
